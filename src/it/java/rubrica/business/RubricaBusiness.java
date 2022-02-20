@@ -2,6 +2,11 @@ package it.java.rubrica.business;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JOptionPane;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -58,6 +63,32 @@ public class RubricaBusiness {
 		rs.next();
 		
 		return rs.getInt(1);
+		
+	}
+	
+	public List<Contatto> RicercaContatto() throws SQLException{
+		
+		String sql = "SELECT id,nome,cognome,telefono FROM contatti ";
+		PreparedStatement ps = getConnections().prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
+		
+		ResultSet rs = ps.executeQuery();
+		
+		List<Contatto> contatti = new ArrayList<Contatto>();
+		
+		while(rs.next()) {
+			Contatto c = new Contatto();
+			
+			c.setId(rs.getInt(1));
+			c.setNome(rs.getString(2));
+			c.setCognome(rs.getString(3));
+			c.setTelefono(rs.getString(4));
+			
+			//JOptionPane.showMessageDialog(null, "ricerca ");
+			contatti.add(c);
+			
+		}		
+		
+		return contatti;
 		
 	}
 	
