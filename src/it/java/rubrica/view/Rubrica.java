@@ -4,17 +4,23 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
-import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Vector;
 import java.awt.event.ActionEvent;
 
 import it.java.rubrica.business.RubricaBusiness;
 import it.java.rubrica.model.Contatto;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.ScrollPaneConstants;
 
 public class Rubrica {
 
@@ -22,6 +28,7 @@ public class Rubrica {
 	private JTextField textField;
 	private JTextField textField_1;
 	private JTextField textField_2;
+	private JTable table;
 
 	/**
 	 * Launch the application.
@@ -41,15 +48,18 @@ public class Rubrica {
 
 	/**
 	 * Create the application.
+	 * 
 	 */
-	public Rubrica() {
+	public Rubrica() throws SQLException {
 		initialize();
 	}
 
 	/**
 	 * Initialize the contents of the frame.
+	 * 
 	 */
-	private void initialize() {
+	@SuppressWarnings("rawtypes")
+	private void initialize() throws SQLException {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 714, 454);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -100,7 +110,16 @@ public class Rubrica {
 				nuovoContatto.setTelefono(textField_2.getText());
 				
 				try {
-					RubricaBusiness.getInstance().aggiungiContatto(nuovoContatto);
+					int id = RubricaBusiness.getInstance().aggiungiContatto(nuovoContatto);
+					
+					if (id>0) {
+						JOptionPane.showMessageDialog(null, "contatto inserito con successo");
+						textField.setText("");
+						textField_1.setText("");
+						textField_2.setText("");
+					}
+						
+					
 				} catch (SQLException e1) {
 					
 					e1.printStackTrace();
@@ -116,6 +135,48 @@ public class Rubrica {
 		panel.add(btnNewButton_1);
 		
 		JTabbedPane tabbedPane_1 = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPane.addTab("Ricerca contatti", null, tabbedPane_1, null);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		
+		tabbedPane.addTab("Ricerca contatti", null, scrollPane, null);
+		
+		scrollPane.add(tabbedPane_1);
+		
+		
+		table = new JTable();
+		table.setModel(new DefaultTableModel(
+			new Object[][] {
+			},
+			new String[] {
+				"id", "Telefono", "Cognome", "Nome"
+			}
+		));
+		
+		DefaultTableModel dtm = (DefaultTableModel) table.getModel();
+		
+	
+		List<Contatto> contatti;
+		
+		try {
+			contatti = RubricaBusiness.getInstance().RicercaContatto();
+			
+			for(Contatto c : contatti) {
+				Vector<Comparable> rowData = new Vector<Comparable>();
+				rowData.add(c.getId());
+				rowData.add(c.getNome());
+				rowData.add(c.getCognome());
+				rowData.add(c.getTelefono());
+				dtm.addRow(rowData);
+			}
+			
+		}
+		catch(SQLException e1){
+			e1.printStackTrace();
+		}
+		
+		
+		
+		scrollPane.setViewportView(table);
 	}
 }
